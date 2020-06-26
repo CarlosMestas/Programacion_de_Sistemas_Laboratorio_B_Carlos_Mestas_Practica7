@@ -8,7 +8,7 @@
 #include <cstring>	
 
 using namespace std;
-/*
+
 // Clase para la exepcion
 class	MyException	{
 public:
@@ -46,4 +46,4 @@ int	main()	{
 	}
 	return	0;
 }
-*/
+
