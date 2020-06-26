@@ -1,0 +1,1011 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\geometry{a4paper}
+\usepackage[T1]{fontenc} % Support Icelandic Characters
+\usepackage[utf8]{inputenc} % Support Icelandic Characters
+\usepackage{graphicx} % Support for including images
+\usepackage{hyperref} % Support for hyperlinks
+\usepackage{wrapfig}
+
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{siunitx}
+
+\usepackage[svgnames]{xcolor}
+
+\usepackage[spanish]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[usenames]{color}
+
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+
+\usepackage{listings}             % Include the listings-package
+\lstdefinestyle{CStyle}{
+    backgroundcolor=\color{backgroundColour},   
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{red},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C
+}
+
+
+%------------------------------------------------------------------
+% TITLE
+%------------------------------------------------------------------
+
+\title{
+\centerline{
+    \includegraphics[width=75mm]{unsa.png}}
+    \vspace{0.5 cm}
+        Programación de Sistemas - Laboratorio - Grupo B
+        \\
+        \\
+        \\
+        \textbf{Práctica Laboratorio N6} 
+        \large  
+        \\
+        %SC-T-718-ATSR,Automatic Speech Recognition, 2019-1 
+        %\\ 
+        \small Universidad Nacional de San Agustín - Escuela Profesional de Ingeniería de Sistemas, Arequipa, Perú 
+  }
+
+\author{
+    Carlos Alberto Mestas Escarcena
+    \\
+    \texttt{cmestas@unsa.edu.pe}
+}
+
+\date{Junio 2020}
+
+\begin{document}
+
+\maketitle
+
+El desarrollo de este informe se puede encontrar en el repositorio de \textcolor{blue}{
+    \href{https://github.com/CarlosMestas/TC_A_6_Carlos_Mestas}{GitHub}}.
+    
+%%%%1
+\section{Ejercicio 1}
+
+\begin{lstlisting}[language=bash,frame=single,style=CStyle]
+/*
+  Ejercicio 1: Explicacion y documentacion del codigo fuente
+  AUTOR: Luis García
+  CARRERA: Ingeniería en Computación
+*/
+
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <windows.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+using namespace std;
+
+// DEFINIENDO LAS VARIABLES NECESARIAS
+string nombre, auxnombre, semestre, edad;
+int clave = 0, auxclave = 0;
+char grupo[10];
+char opca;
+bool encontrado = false;
+
+/*
+  Funcion que nos permite agregar alumnos
+*/
+void altas() {
+    // Variables de la biblioteca fstream para el manejo de archivos
+    ofstream escritura;
+    ifstream consulta;
+    do {
+        escritura.open("alumnos.txt", ios::out | ios::app);// crea y escribe, si ya tiene texto une al final del archivo
+        consulta.open("alumnos.txt", ios::in);// solamente consulta o lee usando la variable sobre el archivo físico alumnos.txt
+        if (escritura.is_open() && consulta.is_open()) {
+            // Variable que va a servir para indicar si el codigo de un alumno ya existe o no
+            bool repetido = false;
+            cout << "\n";
+            cout << "\tIngresa la clave del alumno:    ";
+            cin >> auxclave;
+            // A continuación se aplica el tipo de lectura de archivos secuencial
+            consulta >> clave;
+            // Realizara todo el bucle en caso de que estemos ingresando un codigo ya existente en otro alumno
+            while (!consulta.eof()) {
+                consulta >> nombre >> semestre >> grupo >> edad;
+                if (auxclave == clave) {
+                    cout << "\t\tYa existe la clave del alumno...\n";
+                    repetido = true;
+                    break;
+                }
+                consulta >> clave;
+            }
+            // Cuando el codigo es nuevo si se continua a ingresar los datos del nuevo alumno
+            if (repetido == false) {
+                cout << "\tIngresa el nombre del alumno:   ";
+                cin >> nombre;
+                cout << "\tIngresa el semestre del alumno: ";
+                cin >> semestre;
+                cout << "\tIngresa el grupo del alumno:    ";
+                cin >> grupo;
+                cout << "\tIngresa la edad del alumno:     ";
+                cin >> edad;
+                // ESCRIBIENDO LOS DATOS CAPTURADOS POR EL USUARIO EN EL ARCHIVO
+                escritura << auxclave << " " << nombre << " " << semestre << " " << grupo << " " << edad << endl;
+                cout << "\n\tRegistro agregado...\n";
+            }
+            // Se consulta si se desea agregar mas altas
+            cout << "\n\tDeseas ingresar otro alumno? (S/N): ";
+            cin >> opca;
+
+        }
+        // En el caso de que no se pueda abrir el archivo ni crearlo
+        else {
+            cout << "El archivo no se pudo abrir \n";
+        }
+        escritura.close();
+        consulta.close();
+
+    } while (opca == 'S' or opca == 's');
+
+}
+/*
+  Funcion que nos permite eliminar alumnos
+*/
+void bajas(){
+    ofstream aux;
+    ifstream lectura;
+    // Variable que nos indicara si se encontro la clave de un alumno o no
+    encontrado = false;
+    // Se va a crear un archivo auxiliar donde se van a copiar los alumnos mientras se vayan eliminando
+    // Este archivo reemplazara al alumnos.txt existente
+    aux.open("auxiliar.txt", ios::out);
+    lectura.open("alumnos.txt", ios::in);
+
+    if (aux.is_open() && lectura.is_open()) {
+        cout << "\n";
+        cout << "\tIngresa la clave del alumno que deseas eliminar: ";
+        cin >> auxclave;
+        // De nuevo se aplica el tipo de lectura de archivos secuencial, esto quiere decir que lee campo por campo hasta
+        // hasta llegar al final del archivo gracias a la función .eof()
+        lectura >> clave;
+        while (!lectura.eof()) {
+            lectura >> nombre >> semestre >> grupo >> edad;
+            if (auxclave == clave) {
+                encontrado = true;
+                cout << "\n";
+                cout << "\tClave:    " << clave << endl;
+                cout << "\tNombre:   " << nombre << endl;
+                cout << "\tSemestre: " << semestre << endl;
+                cout << "\tGrupo:    " << grupo << endl;
+                cout << "\tEdad:     " << edad << endl;
+                cout << "\t________________________________\n\n";
+                cout << "\tRealmente deseas eliminar el registro actual (S/N)? ---> ";
+                cin >> opca;
+                if (opca == 'S' or opca == 's') {
+                    cout << "\n\n\t\t\tRegistro eliminado...\n\n\t\t\a";
+                }
+                else {
+                    aux << clave << " " << nombre << " " << semestre << " " << grupo << " " << edad << endl;
+                }
+            }
+            else {
+                aux << clave << " " << nombre << " " << semestre << " " << grupo << " " << edad << endl;
+            }
+            lectura >> clave;
+        }
+    }
+    else {
+        cout << "\n\tEl archivo no se pudo abrir \n";
+    }
+
+    if (encontrado == false) {
+        cout << "\n\tNo se encontro ningun registro con la clave: " << auxclave << "\n\n\t\t\t";
+    }
+    aux.close();
+    lectura.close();
+    // Realiza el cambio de nombre del auxiliar.txt donde se encuentran los alumnos que no han sido eliminados
+    remove("alumnos.txt");
+    rename("auxiliar.txt", "alumnos.txt");
+}
+
+/*
+  Funcion que realizara la impresion de todos los alumnos que existen actualmente
+*/
+void consultas(){
+    // Lectura de archivos
+    ifstream lectura;
+    lectura.open("alumnos.txt", ios::out | ios::in);// CREA, ESCRIBE O LEE
+    if (lectura.is_open()) {
+        // LEYENDO Y MOSTRANDO CADA CAMPO DEL ARCHIVO DE FORMA SECUENCIAL
+        lectura >> clave;
+        while (!lectura.eof()) {
+            lectura >> nombre >> semestre >> grupo >> edad;
+            cout << "\n";
+            cout << "\tClave:    " << clave << endl;
+            cout << "\tNombre:   " << nombre << endl;
+            cout << "\tSemestre: " << semestre << endl;
+            cout << "\tGrupo:    " << grupo << endl;
+            cout << "\tEdad:     " << edad << endl;
+            lectura >> clave;
+            cout << "\t________________________________\n";
+        }
+
+    }
+    else {
+        cout << "El archivo no se pudo abrir \n";
+    }
+    lectura.close();
+}
+
+/*
+  Funcion que va a realizar una busqueda mediante el codigo de un alumno si existe lo muestra
+*/
+void buscar(){
+    ifstream lectura;
+    lectura.open("alumnos.txt", ios::out | ios::in);
+    // Variable que indicara si el alumno se encuentra en los datos o no
+    encontrado = false;
+
+    if (lectura.is_open()) {
+        cout << "\n\tIngresa la clave del alumno que deseas buscar: ";
+        cin >> auxclave;
+
+        lectura >> clave;
+        while (!lectura.eof()) {
+            lectura >> nombre >> semestre >> grupo >> edad;
+            //comparar cada registro para ver si es encontrado
+
+            if (auxclave == clave) {
+                cout << "\n";
+                cout << "\tClave:    " << clave << endl;
+                cout << "\tNombre:   " << nombre << endl;
+                cout << "\tSemestre: " << semestre << endl;
+                cout << "\tGrupo:    " << grupo << endl;
+                cout << "\tEdad:     " << edad << endl;
+                cout << "\t________________________________\n";
+                encontrado = true;
+                break;
+            }//fin del if mostrar encontrado
+
+            //lectura adelantada
+            lectura >> clave;
+        }//fin del while
+        if (encontrado == false) {
+            cout << "\n\n\tNo hay registros con la clave: " << auxclave << "\n\n\t\t\t";
+        }
+    }
+    else {
+        cout << "\n\tAun no se pudo abrir el archivo...";
+    }
+
+    lectura.close();
+}
+
+/*
+  Funcion que va a permitir modificar el nombre de un alumno
+*/
+void modificar(){
+    ofstream aux;
+    ifstream lectura;
+    // Variable que indicara si el alumno se encuentra en los datos o no
+    encontrado = false;
+    // De la misma manera que se trabajo el anterior caso de eliminacion, tambien se va a necesitar
+    // un archivo auxiliar donde se almacenaran los datos cambiados
+    aux.open("auxiliar.txt", ios::out);
+    lectura.open("alumnos.txt", ios::in);
+
+    if (aux.is_open() && lectura.is_open()) {
+
+        cout << "\n";
+        cout << "\tIngresa la clave del alumno que deseas modificar: ";
+        cin >> auxclave;
+
+        lectura >> clave;
+        while (!lectura.eof()) {
+            lectura >> nombre >> semestre >> grupo >> edad;
+            if (auxclave == clave) {
+                encontrado = true;
+                cout << "\n";
+                cout << "\tClave:    " << clave << endl;
+                cout << "\tNombre:   " << nombre << endl;
+                cout << "\tSemestre: " << semestre << endl;
+                cout << "\tGrupo:    " << grupo << endl;
+                cout << "\tEdad:     " << edad << endl;
+                cout << "\t________________________________\n\n";
+                cout << "\tIngresa el nuevo nombre del alumno con la clave: " << auxclave << "\n\n\t---> ";
+                cin >> auxnombre;
+
+                aux << clave << " " << auxnombre << " " << semestre << " " << grupo << " " << edad << endl;
+                cout << "\n\n\t\t\tRegistro modificado...\n\t\t\a";
+            }
+            else {
+                aux << clave << " " << nombre << " " << semestre << " " << grupo << " " << edad << endl;
+            }
+            lectura >> clave;
+        }
+    }
+    else {
+        cout << "\n\tEl archivo no se pudo abrir \n";
+    }
+
+    if (encontrado == false) {
+        cout << "\n\tNo se encontro ningun registro con la clave: " << auxclave << "\n\n\t\t\t";
+    }
+    aux.close();
+    lectura.close();
+    // Se realiza el cambio 
+    remove("alumnos.txt");
+    rename("auxiliar.txt", "alumnos.txt");
+}
+
+/*
+  Funcion principal
+*/
+int main(){
+    // Cambio de color de la consola
+    system("color f0");
+    int opc;
+    do {
+        // Limpia la consola
+        system("cls");
+        // Menu de opciones
+        cout << "\n\tManejo de archivos en c++\n\n";
+        cout << "\n\t1.-Altas";
+        cout << "\n\t2.-Bajas";
+        cout << "\n\t3.-Consultas";
+        cout << "\n\t4.-Buscar un registro";
+        cout << "\n\t5.-Modificaciones";
+        cout << "\n\t6.-Salir";
+        cout << "\n\n\tElige una opcion:  ";
+        cin >> opc;
+        switch (opc){
+        case 1: {
+            system("cls");
+            altas();
+            cout << "\n\t\t";
+            system("pause");
+            break;
+        }
+        case 2: {
+            system("cls");
+            bajas();
+            cout << "\n\t\t";
+            system("pause");
+            break;
+        }
+
+        case 3: {
+            system("cls");
+            consultas();
+            cout << "\n\t\t";
+            system("pause");
+            break;
+        }
+        case 4: {
+            system("cls");
+            buscar();
+            cout << "\n\t\t";
+            system("pause");
+            break;
+        }
+        case 5: {
+            system("cls");
+            modificar();
+            cout << "\n\t\t";
+            system("pause");
+
+            break;
+        }
+        case 6: {
+            cout << "\n\n\tHa elegido salir...\n\n\t\t"; system("pause");
+            break;
+        }
+        default: {
+            cout << "\n\n\tHa elegido una opcion inexistente...\n\n\t\t"; system("pause");
+            break;
+        }
+        }//fin switch
+
+    } while (opc != 6);
+    // Limpia la consola
+    system("cls");
+    return 0;
+}
+\end{lstlisting}
+
+\section{Ejercicio 2}
+
+\begin{lstlisting}[language=bash,frame=single,style=CStyle]
+// Exercise_2.cpp : Desarrollo del ejercicio 2
+// Curso: Programacion de Sistemas
+// Laboratorio: B
+// Autor: Carlos Alberto Mestas Escarcena
+// Fecha: 19/06/2020
+
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <windows.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+
+using namespace std;
+
+// Definiendo las variables
+
+struct Tdato
+{
+    int b;
+    char s[100];
+};
+int x, n, a[10] = {1,2,3,4,5,6,7,8,9,0};
+double f;
+char nombre[] = "Ejercicios ficheros binarios";
+Tdato p;
+ifstream f1;
+ofstream f2;
+
+/*
+  Funcion principal
+*/
+int main(){
+    // Cambio de color de la consola
+    system("color f0");
+    f1.open("entrada.dat", ios::binary);
+    f2.open("salida.dat", ios::binary);
+    x = 7;
+    f = 5.125;
+    p.b = 123;
+    strcpy_s(p.s, "Carlos");
+    if (f2.is_open()) {
+        f2 << x << endl;
+        f2 << f << endl;
+        for (int i = 0; i < 5; i++) {
+            f2 << a[i];
+        }
+        f2 << endl;
+        for (int i = 0; i < 10; i++) {
+            f2 << nombre[i];
+        }
+        f2 << endl;
+        f2 << p.b << " " << p.s << endl;
+
+    }
+    else {
+        cout << "Error al escribir en el fichero";
+    }
+    string c;
+    string c1, c2, c3, c4, c5, c6;
+    if (f1.is_open()) {
+        int i = 1;
+        while (!f1.eof()) {
+            f1 >> c;
+            if (i == 1) {
+                c1 = c;
+                i++;
+            }
+            else if (i == 2) {
+                c2 = c;
+                i++;
+            }
+            else if (i == 3) {
+                c3 = c;
+                i++;
+            }
+            else if (i == 4) {
+                c4 = c;
+                i++;
+            }
+            else if (i == 5) {
+                c5 = c;
+                i++;
+            }
+            else {
+                c6 = c;
+                i++;
+            }
+        }
+    }
+    else {
+        cout << "Error al leer el fichero";
+    }
+    // Asignamos los distintos valores del fichero de lectura a los variables
+    x = std::stoi(c1);
+    f = std::stof(c2);
+    for (int j = 0; j < 5; j++) {
+        a[j] = (int)(c3.at(j)) - 48;
+    }
+    for (int j = 0; j < 10; j++) {
+        nombre[j] = (c4.at(j));
+    }
+    p.b = std::stoi(c5);
+    strcpy_s(p.s, c6.c_str());
+    // Impresiones de las variables
+    cout << "Impresion de los valores de lectura: " << endl;
+    cout << "x = " << x << endl;
+    cout << "f = " << f << endl;
+    cout << "5 primeros valores del arreglo: ";
+    for (int j = 0; j < 5; j++) {
+        cout << a[j];
+    }
+    cout << endl;
+    for (int j = 0; j < 10; j++) {
+        cout << nombre[j];
+    }
+    cout << endl;
+    cout << p.b << "\t" << p.s;
+
+    return 0;
+}
+\end{lstlisting}
+
+\newpage
+\clearpage
+
+Valores de entrada que se van a leer y almacenar en las variables:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/Capture002B.PNG}
+    \caption{Ejercicio 2 - entrada.dat}
+\end{figure}
+
+Valore que se almacenan mediante código:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/Capture002A.PNG}
+    \caption{Ejercicio 2 - salida.dat}
+\end{figure}
+
+Ejemplo de impresión de las variables almacenadas:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/Capture002C.PNG}
+    \caption{Ejercicio 2 - Ejecución}
+\end{figure}
+
+
+\newpage
+\clearpage
+
+\section{Ejercicio 3}
+\begin{lstlisting}[language=bash,frame=single,style=CStyle]
+// Exercise_3.cpp : Desarrollo del ejercicio 3
+// Curso: Programacion de Sistemas
+// Laboratorio: B
+// Autor: Carlos Alberto Mestas Escarcena
+// Fecha: 19/06/2020
+
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <stdio.h>
+#include <string.h>
+
+using namespace std;
+
+void write() {
+    ofstream write;
+    write.open("phrases.txt", ios::out | ios::app);// crea y escribe, si ya tiene texto une al final del archivo
+    if (write.is_open()) {
+        char tmp[60];
+        cout << "\nIntroduzca una frase: \n";
+        gets_s(tmp);
+        // Si ingresamos vacio
+        while (strcmp(tmp, "") != 0) {
+            write << tmp << "\n";
+            cout << "\nIntroduzca una frase: \n";
+            gets_s(tmp);
+        }
+    }
+    // En el caso de que no se pueda abrir el archivo ni crearlo
+    else {
+        cout << "El archivo no se pudo abrir \n";
+    }
+    write.close();
+}
+
+void read() {
+    ifstream read;
+    read.open("phrases.txt", ios::out | ios::in);
+    int key = 0;
+    string phraseTmp;
+    if (read.is_open()) {
+        // LEYENDO Y MOSTRANDO CADA CAMPO DEL ARCHIVO DE FORMA SECUENCIAL
+        while (read) {
+            char str[255];
+            read.getline(str, 255);  // delim defaults to '\n'
+            if (read){
+                cout << str << endl;
+                cout << "--------------------------------------------------" << endl;
+            }
+        }
+
+    }
+    else {
+        cout << "El archivo no se pudo abrir \n";
+    }
+    read.close();
+}
+
+int main() {
+    system("color f0");
+    write();
+    read();
+    exit(0);
+    return 0;
+}
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/Capture003A.PNG}
+    \caption{Ejercicio 3 - Ejecución}
+\end{figure}
+
+\section{Ejercicio 4}
+
+\begin{lstlisting}[language=bash,frame=single,style=CStyle]
+// Exercise_4.cpp : Desarrollo del ejercicio 4
+// Curso: Programacion de Sistemas
+// Laboratorio: B
+// Autor: Carlos Alberto Mestas Escarcena
+// Fecha: 19/06/2020
+
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <stdio.h>
+#include <string.h>
+
+using namespace std;
+
+void readFile() {
+    ifstream read;
+    string nameFile;
+    char tmp0[25];
+    cout << "Ingrese nombre del archivo:";
+    cin >> nameFile;
+    gets_s(tmp0);
+    cout << endl;
+    read.open(nameFile, ios::in);
+    string phraseTmp;
+    if (read.is_open()) {
+        int i = 0;
+        while (read && i < 25) {
+            char str[255];
+            read.getline(str, 255);
+            i++;
+            cout << i << "\t";
+            if (read) 
+                cout << str << endl;
+            
+            if (i == 25) {
+                cout << endl;
+                char tmp[1];
+                cout << "Presione ENTER si desea continuar con la lectura: \n";
+                gets_s(tmp);
+                if (strcmp(tmp, "") == 0)
+                    i = 0;
+                else {
+                    cout << "\n Programa finalizado";
+                    exit(0);
+                }
+                    
+            }
+
+        }
+        cout << "---------------Final del archivo-------------------" << endl;
+    }
+    else {
+        cout << "El archivo no se pudo abrir o no existe\n";
+    }
+    read.close();
+}
+
+int main() {
+    system("color f0");
+    readFile();
+    exit(0);
+    return 0;
+}
+\end{lstlisting}
+
+\newpage
+\clearpage
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/Capture004A.PNG}
+    \caption{Ejercicio 4 - Ejecución parte I}
+\end{figure}
+
+\newpage
+\clearpage
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/Capture004B.PNG}
+    \caption{Ejercicio 4 - Ejecución parte II}
+\end{figure}
+
+\newpage
+\clearpage
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/Capture004C.PNG}
+    \caption{Ejercicio 4 - Ejecución parte III}
+\end{figure}
+
+\newpage
+\clearpage
+
+\section{Ejercicio 5}
+
+\begin{lstlisting}[language=bash,frame=single,style=CStyle]
+// Exercise_5.cpp : Desarrollo del ejercicio 5
+// Curso: Programacion de Sistemas
+// Laboratorio: B
+// Autor: Carlos Alberto Mestas Escarcena
+// Fecha: 19/06/2020
+// Modificacion del ejercicio 1 de autor Luis Garcia
+
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <windows.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+using namespace std;
+
+// Definiendo las variables
+string name, address, phone, email, day, month, year;
+string nameT = "", auxName = "";
+char grupo[100];
+char opca;
+bool encontrado = false;
+
+/*
+  Funcion que nos permite agregar contactos
+*/
+void addContact() {
+    // Variables de la biblioteca fstream para el manejo de archivos
+    ofstream escritura;
+    ifstream consulta;
+    do {
+        escritura.open("agenda.dat", ios::out | ios::app);
+        consulta.open("agenda.dat", ios::in);
+        if (escritura.is_open() && consulta.is_open()) {
+            // Variable que va a servir para indicar si el nombre de un alumno ya existe o no
+            bool repetido = false;
+            cout << "\n";
+            cout << "\tIngresa el nombre del contacto: ";
+            cin >> auxName;
+            // A continuación se aplica el tipo de lectura de archivos secuencial
+            consulta >> nameT;
+            // Realizara todo el bucle en caso de que estemos ingresando un nombre ya existente en otro contacto
+            while (!consulta.eof()) {
+                consulta >> address >> phone >> email >> day >> month >> year;
+                if (auxName == nameT) {
+                    cout << "\t\tYa existe ese contacto en la agenda ...\n";
+                    repetido = true;
+                    break;
+                }
+                consulta >> nameT;
+            }
+            // Cuando el nombre es nuevo si se continua a ingresar los datos del nuevo conctacto
+            if (repetido == false) {
+                cout << "\tIngresa la direccion del contacto: ";
+                cin >> address;
+                cout << "\tIngresa el numero de celular del contacto: ";
+                cin >> phone;
+                cout << "\tIngresa el correo del contacto:     ";
+                cin >> email;
+                cout << "\tIngresa el dia de nacimiento del contacto: ";
+                cin >> day;
+                cout << "\tIngresa el mes de nacimiento del contacto: ";
+                cin >> month;
+                cout << "\tIngresa el anio de nacimiento del contacto: ";
+                cin >> year;
+                // Escribe los datos del contacto en el archivo
+                escritura << auxName << " " << address << " " << phone << " " << email << " " << day << " " << month << " " << year << endl;
+                cout << "\n\tContacto agregado correctamente...\n";
+            }
+            // Se consulta si se desea agregar mas contactos
+            cout << "\n\tDeseas ingresar otro contacto? (S/N): ";
+            cin >> opca;
+        }
+        // En el caso de que no se pueda abrir el archivo ni crearlo
+        else {
+            cout << "El archivo no se pudo abrir \n";
+        }
+        escritura.close();
+        consulta.close();
+
+    } while (opca == 'S' or opca == 's');
+
+}
+
+/*
+  Funcion que realizara la impresion de todos los contactos existentes
+*/
+void showContacts() {
+    // Lectura de archivos
+    ifstream lectura;
+    lectura.open("agenda.dat", ios::out | ios::in);
+    if (lectura.is_open()) {
+        lectura >> name;
+        while (!lectura.eof()) {
+            lectura >> address >> phone >> email >> day >> month >> year;
+            cout << "\n";
+            cout << "\tNombre:    " << name << endl;
+            cout << "\tDireccion:    " << address << endl;
+            cout << "\tTelefono:    " << phone << endl;
+            cout << "\tCorreo:    " << email << endl;
+            cout << "\tFecha de nacimiento:    " << day << " / "<< month<< " / "<< year<<endl;
+            lectura >> nameT;
+            cout << "\t________________________________\n";
+        }
+
+    }
+    else {
+        cout << "El archivo no se pudo abrir \n";
+    }
+    lectura.close();
+}
+
+/*
+  Funcion que va a realizar una busqueda mediante el nombre de un contacto si existe lo muestra
+*/
+
+void searchConctact() {
+    ifstream lectura;
+    lectura.open("agenda.dat", ios::out | ios::in);
+    // Variable que indicara si el contacto se encuentra en la agenda o no
+    encontrado = false;
+    if (lectura.is_open()) {
+        cout << "\n\tIngresa el nombre del contacto que desea buscar: ";
+        cin >> auxName;
+        lectura >> nameT;
+        while (!lectura.eof()) {
+            lectura >> address >> phone >> email >> day >> month >> year;
+            // Comparar cada registro para ver si es encontrado
+            if (auxName == nameT) {
+                cout << "\n";
+                cout << "\tNombre:    " << nameT << endl;
+                cout << "\tDireccion:    " << address << endl;
+                cout << "\tTelefono:    " << phone << endl;
+                cout << "\tCorreo:    " << email << endl;
+                cout << "\tFecha de nacimiento:    " << day << " / " << month << " / " << year << endl;
+                lectura >> nameT;
+                cout << "\t________________________________\n";
+                encontrado = true;
+                break;
+            }
+            lectura >> nameT;
+        }
+        if (encontrado == false) {
+            cout << "\n\n\tNo hay ningun contacto con el nombre: " << auxName << "\n\n\t\t\t";
+        }
+    }
+    else {
+        cout << "\n\tAun no se pudo abrir el archivo...";
+    }
+
+    lectura.close();
+}
+
+/*
+  Funcion principal
+*/
+int main(){
+    // Cambio de color de la consola
+    system("color f0");
+    int opc;
+    do {
+        // Limpia la consola
+        system("cls");
+        // Menu de opciones
+        cout << "\n\tMI AGENDA\n";
+        cout << "\n\t1. Agregar contacto";
+        cout << "\n\t2. Mostrar todos los contactos";
+        cout << "\n\t3. Buscar un contacto";
+        cout << "\n\t4. Salir";
+        cout << "\n\n\tElige una opcion:  ";
+        cin >> opc;
+        switch (opc){
+        case 1: {
+            system("cls");
+            addContact();
+            cout << "\n\t\t";
+            system("pause");
+            break;
+        }
+        case 2: {
+            system("cls");
+            showContacts();
+            cout << "\n\t\t";
+            system("pause");
+            break;
+        }
+              
+        case 3: 
+            system("cls");
+            searchConctact();
+            cout << "\n\t\t";
+            system("pause");
+            break;       
+        case 4: {
+            cout << "\n\n\tHa elegido salir...\n\n\t\t"; 
+            system("pause");
+            break;
+        }
+        default: {
+            cout << "\n\n\tHa elegido una opcion que no es encuentra en el menu ...\n\n\t\t"; 
+            system("pause");
+            break;
+        }
+        }
+
+    } while (opc != 4);
+    system("cls");
+    return 0;
+}
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/Capture005A.PNG}
+    \caption{Ejercicio 5 - Ejecución}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Capture005B.PNG}
+    \caption{Ejercicio 5 - Ejecución}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Capture005C.PNG}
+    \caption{Ejercicio 5 - Ejecución}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Capture005D.PNG}
+    \caption{Ejercicio 5 - Ejecución}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Capture005E.PNG}
+    \caption{Ejercicio 5 - Ejecución}
+\end{figure}
+\end{document}
+
+
