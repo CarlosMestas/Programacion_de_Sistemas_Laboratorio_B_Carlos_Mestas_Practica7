@@ -7,21 +7,9 @@
 #include <iostream>
 #include <cstring>	
 #include <math.h>
+#include "Exceptions.h"
 
 using namespace std;
-
-// Clase para la exepcion
-class	MyException	{
-public:
-	// Almacenara el mensaje de error
-	char msg[40];
-	MyException(){
-		*msg = 0;	
-	}
-	MyException(const char *msg2) {
-		strcpy(this->msg, msg2);
-	}
-};
 
 // Funcion principal
 int	main() {
