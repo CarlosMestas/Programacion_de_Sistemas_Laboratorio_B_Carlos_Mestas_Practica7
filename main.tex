@@ -81,21 +81,17 @@
 El desarrollo de este informe se puede encontrar en el repositorio de \textcolor{blue}{
     \href{https://github.com/CarlosMestas/Programacion_de_Sistemas_Laboratorio_B_Carlos_Mestas_Practica7}{GitHub}}.
     
-%%%%1
-\section{Ejercicio 1}
+%%%%%
+
+El siguiente código es la cabecera que se utilizará para todos los ejercicios.
+\section*{Exception.h}
 
 \begin{lstlisting}[language=bash,frame=single,style=CStyle]
-// Exercise_1.cpp : Desarrollo del ejercicio 1
-// Curso: Programacion de Sistemas
-// Laboratorio: B
-// Autor: Carlos Alberto Mestas Escarcena
-// Fecha: 26/06/2020
+#ifndef EXCEPTIONS_H
+#define EXCEPTIONS_H
 
-#include <iostream>
 #include <cstring>	
-
-using namespace std;
-
+#include <iostream>
 // Clase para la exepcion
 class	MyException	{
 public:
@@ -108,6 +104,48 @@ public:
 		strcpy(this->msg, msg2);
 	}
 };
+
+class ComputerException {
+public:
+	char mesage[50];
+};
+
+class InputException: public ComputerException{
+public:
+	InputException(const char *msg2) {
+		strcpy(this->mesage, msg2);
+	}
+};
+
+class ProcessorException: public ComputerException{
+public:
+	ProcessorException(const char *msg2) {
+		strcpy(this->mesage, msg2);
+	}
+};
+
+class OutputException: public ComputerException{
+public:
+	OutputException(const char *msg2) {
+		strcpy(this->mesage, msg2);
+	}
+};
+#endif
+\end{lstlisting}
+
+\section{Ejercicio 1}
+
+\begin{lstlisting}[language=bash,frame=single,style=CStyle]
+// Exercise_1.cpp : Desarrollo del ejercicio 1
+// Curso: Programacion de Sistemas
+// Laboratorio: B
+// Autor: Carlos Alberto Mestas Escarcena
+// Fecha: 26/06/2020
+
+#include <iostream>
+#include <cstring>	
+#include "Exceptions.h"
+using namespace std;
 
 // Funcion principal
 int	main()	{
@@ -147,8 +185,7 @@ int	main()	{
     \caption{Ejercicio 1 - Ejecución II}
 \end{figure}
 
-\clearpage
-\newpage
+
 
 \section{Ejercicio 2}
 
@@ -161,21 +198,9 @@ int	main()	{
 
 #include <iostream>
 #include <cstring>	
+#include "Exceptions.h"
 
 using namespace std;
-
-// Clase para la exepcion
-class	MyException	{
-public:
-	// Almacenara el mensaje de error
-	char msg[40];
-	MyException(){
-		*msg = 0;	
-	}
-	MyException(const char *msg2){
-		strcpy(this->msg, msg2);
-	}
-};
 
 // Funcion que capturara el error y devolvera al main
 void throwExceptionDivisionByZero(double _divisor){
@@ -216,6 +241,7 @@ int	main()	{
 }
 \end{lstlisting}
 
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\textwidth]{images/Capture02A.PNG}
@@ -246,30 +272,12 @@ Por ejemplo si nosotros tenemos un dato numérico entero, por ejemplo la edad de
 \section{Ejercicio 4}
 
 \begin{lstlisting}[language=bash,frame=single,style=CStyle]
-// Exercise_4.cpp : Desarrollo del ejercicio 4
-// Curso: Programacion de Sistemas
-// Laboratorio: B
-// Autor: Carlos Alberto Mestas Escarcena
-// Fecha: 26/06/2020
-
 #include <iostream>
 #include <cstring>	
 #include <math.h>
+#include "Exceptions.h"
 
 using namespace std;
-
-// Clase para la exepcion
-class	MyException	{
-public:
-	// Almacenara el mensaje de error
-	char msg[40];
-	MyException(){
-		*msg = 0;	
-	}
-	MyException(const char *msg2) {
-		strcpy(this->msg, msg2);
-	}
-};
 
 // Funcion principal
 int	main() {
@@ -308,6 +316,85 @@ int	main() {
 	return	0;
 }
 \end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/Capture04A.PNG}
+    \caption{Ejercicio 4 - Ejecución I}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/Capture04B.PNG}
+    \caption{Ejercicio 4 - Ejecución II}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/Capture04C.PNG}
+    \caption{Ejercicio 4 - Ejecución III}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/Capture04D.PNG}
+    \caption{Ejercicio 4 - Ejecución IV}
+\end{figure}
+
+\clearpage
+\newpage
+
+\section{Ejercicio 5}
+
+\begin{lstlisting}[language=bash,frame=single,style=CStyle]
+// Exercise_5.cpp : Desarrollo del ejercicio 5
+// Curso: Programacion de Sistemas
+// Laboratorio: B
+// Autor: Carlos Alberto Mestas Escarcena
+// Fecha: 30/06/2020
+
+#include <iostream>
+#include <fstream>
+#include "Exceptions.h"
+
+using namespace std;
+int main(){
+	system("color f0");
+	bool y = false;
+	do{
+		try	{
+			string fileNameText;
+			cout << "\nIngrese el nombre del fichero para imprimirlo: \n";
+			cin >> fileNameText;
+			std::ifstream file(fileNameText);
+			if (file.is_open()) {
+				y = true;
+				std::string line;
+				while (std::getline(file, line)) {
+					printf("%s", line.c_str());
+				}
+				file.close();
+			}
+			else{
+				throw InputException("No se encontro el fichero ...");
+			}
+		}
+		catch(InputException e){
+			cerr <<	"Error:	" << e.mesage;	
+		}
+		
+	}
+	while(y == false);
+	
+	return 0;
+}
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/Capture05A.PNG}
+    \caption{Ejercicio 4 - Ejecución IV}
+\end{figure}
 
 \end{document}
 
